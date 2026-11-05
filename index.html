@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="mn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" media="(prefers-color-scheme: light)" content="#f2f2f7">
+<meta name="theme-color" media="(prefers-color-scheme: dark)" content="#000000">
+<title>Email Maker</title>
+<style>
+  :root {
+    color-scheme: light dark;
+    --bg: #f2f2f7;
+    --card: #ffffff;
+    --segment-on: #ffffff;
+    --field: #f2f2f7;
+    --text: #1c1c1e;
+    --muted: #6c6c70;
+    --line: rgba(60, 60, 67, .16);
+    --bar: rgba(242, 242, 247, .86);
+    --accent: #0a7cc2;
+    --on-accent: #ffffff;
+    --danger: #c5281c;
+    --success: #1f7a3d;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #000000;
+      --card: #1c1c1e;
+      --segment-on: #636366;
+      --field: #2c2c2e;
+      --text: #f5f5f7;
+      --muted: #98989f;
+      --line: rgba(235, 235, 245, .16);
+      --bar: rgba(0, 0, 0, .8);
+      --accent: #4aa8ea;
+      --on-accent: #00233a;
+      --danger: #ff6961;
+      --success: #5dd27f;
+    }
+  }
+
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font: 16px/1.45 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .top, .layout, .bar-inner {
+    max-width: 1120px;
+    margin: 0 auto;
+    padding-left: max(16px, env(safe-area-inset-left));
+    padding-right: max(16px, env(safe-area-inset-right));
+  }
+  .top { padding-top: max(24px, env(safe-area-inset-top)); padding-bottom: 16px; }
+  .top h1 { margin: 0; font-size: 26px; line-height: 1.2; font-weight: 700; letter-spacing: -.2px; }
+  .top p { margin: 2px 0 0; font-size: 14px; color: var(--muted); }
+
+  .layout { display: grid; gap: 20px; padding-bottom: 28px; }
+  .layout > * { min-width: 0; }
+  @media (min-width: 900px) {
+    .layout { grid-template-columns: 380px minmax(0, 1fr); gap: 28px; align-items: start; }
+    .preview { position: sticky; top: 16px; }
+  }
+
+  .card { background: var(--card); border-radius: 14px; margin: 0 0 12px; }
+  .card-body { display: grid; gap: 14px; padding: 16px; }
+  .card h2 { margin: 0; font-size: 13px; font-weight: 600; color: var(--muted); }
+
+  summary {
+    display: flex; align-items: center; justify-content: space-between;
+    min-height: 50px; padding: 0 16px;
+    font-weight: 600; cursor: pointer; list-style: none; border-radius: 14px;
+  }
+  summary::-webkit-details-marker { display: none; }
+  summary::after {
+    content: ""; width: 8px; height: 8px; margin-right: 3px;
+    border-right: 2px solid var(--muted); border-bottom: 2px solid var(--muted);
+    transform: rotate(45deg); transition: transform .15s;
+  }
+  details[open] > summary::after { transform: rotate(-135deg); }
+  details[open] > summary { border-radius: 14px 14px 0 0; }
+  details .card-body { padding-top: 2px; }
+
+  label.field { display: grid; gap: 5px; font-size: 13px; color: var(--muted); min-width: 0; }
+  input:not([type=checkbox]), textarea {
+    width: 100%; min-width: 0; min-height: 44px; margin: 0; padding: 10px 12px;
+    font: inherit; font-size: 16px; color: var(--text);
+    background: var(--field); border: 0; border-radius: 10px;
+    -webkit-appearance: none; appearance: none;
+  }
+  textarea { display: block; resize: vertical; line-height: 1.4; }
+  input::placeholder, textarea::placeholder { color: var(--muted); opacity: 1; }
+  :is(input, textarea, button, summary, a):focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+  input.missing { box-shadow: inset 0 0 0 1.5px var(--danger); }
+
+  .banner-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .banner-option { position: relative; display: grid; gap: 5px; font-size: 13px; color: var(--muted); cursor: pointer; }
+  .banner-option input { position: absolute; opacity: 0; width: 1px; height: 1px; margin: 0; }
+  .banner-thumb {
+    display: flex; align-items: center; justify-content: center;
+    width: 100%; aspect-ratio: 5 / 2; object-fit: cover; padding: 0;
+    background: var(--field); border-radius: 8px; outline: 1px solid var(--line); outline-offset: 0;
+  }
+  .banner-option input:checked + .banner-thumb { outline: 2.5px solid var(--accent); outline-offset: 1px; }
+  .banner-option input:checked ~ span:last-child { color: var(--text); font-weight: 600; }
+  .banner-option input:focus-visible + .banner-thumb { outline: 2.5px solid var(--accent); outline-offset: 3px; }
+  .hint { margin: 0; font-size: 13px; line-height: 1.45; color: var(--muted); }
+  .hint code { font: inherit; color: var(--text); white-space: nowrap; }
+  .hint a, .link { color: var(--accent); }
+
+  .link {
+    justify-self: start; min-height: 44px; padding: 0 16px; background: none; border: 0;
+    font: inherit; font-size: 15px; cursor: pointer;
+  }
+
+  .preview-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 10px; }
+  .preview-head h2 { margin: 0; font-size: 13px; font-weight: 600; color: var(--muted); }
+  .segment { display: inline-flex; padding: 2px; background: var(--line); border-radius: 9px; }
+  .segment button {
+    min-height: 32px; padding: 0 14px; border: 0; border-radius: 7px; background: none;
+    font: inherit; font-size: 13px; font-weight: 500; color: var(--text); cursor: pointer;
+  }
+  .segment button[aria-pressed=true] { background: var(--segment-on); box-shadow: 0 1px 3px rgba(0, 0, 0, .18); }
+
+  /* The preview imitates a mail app: only background and text color change, like on a real phone. */
+  .mail { padding: 24px 16px; border-radius: 14px; border: 1px solid var(--line); overflow: hidden; overflow-wrap: anywhere; }
+  .mail[data-mode=light] { background: #ffffff; color: #1c1c1e; }
+  .mail[data-mode=dark] { background: #1c1c1e; color: #f5f5f7; }
+  @media (min-width: 900px) { .mail { padding: 32px; } }
+
+  .bar {
+    position: sticky; bottom: 0; z-index: 5;
+    background: var(--bar); border-top: 1px solid var(--line);
+    -webkit-backdrop-filter: saturate(180%) blur(18px); backdrop-filter: saturate(180%) blur(18px);
+  }
+  .bar-inner {
+    display: flex; align-items: center; gap: 14px;
+    padding-top: 10px; padding-bottom: max(10px, env(safe-area-inset-bottom));
+  }
+  #msg { flex: 1; min-width: 0; margin: 0; font-size: 13px; line-height: 1.35; color: var(--muted); }
+  #msg[data-kind=error] { color: var(--danger); }
+  #msg[data-kind=ok] { color: var(--success); }
+  #copy {
+    flex: none; min-height: 46px; padding: 0 22px; border: 0; border-radius: 12px;
+    background: var(--accent); color: var(--on-accent);
+    font: inherit; font-size: 16px; font-weight: 600; cursor: pointer;
+  }
+  #copy:active { opacity: .8; }
+
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+</head>
+<body>
+  <header class="top">
+    <h1>Имэйл үүсгэгч</h1>
+    <p>JCI Монгол · томилгооны имэйл</p>
+  </header>
+
+  <main class="layout">
+    <form id="form" autocomplete="off"></form>
+
+    <section class="preview" aria-label="Урьдчилан харах">
+      <div class="preview-head">
+        <h2>Урьдчилан харах</h2>
+        <div class="segment" role="group" aria-label="Харагдах байдал">
+          <button type="button" data-mode="light">Цайвар</button>
+          <button type="button" data-mode="dark">Бараан</button>
+        </div>
+      </div>
+      <div class="mail" id="mail"></div>
+    </section>
+  </main>
+
+  <div class="bar">
+    <div class="bar-inner">
+      <p id="msg" role="status">Мэдээллээ бөглөөд имэйлээ хуулна уу.</p>
+      <button type="button" id="copy">Имэйл хуулах</button>
+    </div>
+  </div>
+
+<script>
+  /* ---------- Default content. Edit here to change it for everyone. ---------- */
+  const DEFAULTS = {
+    year: '2027',
+    role: 'бүс хариуцсан ажилтан',
+    deadline: '2026-11-06',
+    phone: '8888 2971',
+    bannerFile: 'banners/blue.gif',
+    signoff: 'Хүндэтгэсэн,',
+    senderName: 'А. Эрдэнэгарьд /SG/',
+    senderDetails: '{он} оны Хөгжлийн зөвлөл\n“Жэй Си Ай Монгол” ТББ',
+    heading: 'Танд баяр хүргэе!',
+    greeting: 'Сайн байна уу, {нэр},',
+    intro: 'Таныг JCI Монгол байгууллагын {он} оны Хөгжлийн зөвлөлийн сонгон шалгаруулалтад оролцсонд баярлалаа.',
+    appointmentLabel: 'Албан ёсны томилгоо',
+    appointment: 'Сонгон шалгаруулалтын үр дүнд таныг {он} оны Хөгжлийн зөвлөлийн {албан тушаал} албан тушаалд томилогдсоныг албан ёсоор мэдэгдэж байна.',
+    deadlineLabel: 'Хариу өгөх хугацаа',
+    deadlineText: 'Томилгоо, саналыг хүлээн авч буй эсэхээ {огноо} өдрийн дотор хариу мэдэгдэж, баталгаажуулна уу.',
+    contact: 'Асуух зүйл байвал: {утас}',
+    replyNote: 'Энэ имэйлд хариу бичиж баталгаажуулах боломжтой.',
+    footer: 'JCI Mongolia · {он} Development Council',
+  };
+
+  /* ---------- Banner choices. An empty file means no banner, only the text heading. ---------- */
+  const BANNERS = [
+    { file: 'banners/blue.gif', label: 'Цэнхэр' },
+    { file: 'banners/dark.gif', label: 'Бараан' },
+    { file: 'banners/light.gif', label: 'Цайвар' },
+    { file: 'banners/gold.gif', label: 'Алтлаг' },
+    { file: 'hero.gif', label: 'Анхны (2027)' },
+    { file: '', label: 'Баннергүй' },
+  ];
+
+  /* ---------- Form layout ---------- */
+  const GROUPS = [
+    { title: 'Томилгоо', fields: [
+      { key: 'year', label: 'Он', inputmode: 'numeric' },
+      { key: 'role', label: 'Албан тушаал (бүсийн нэрийн дараах хэсэг)' },
+      { key: 'deadline', label: 'Хариу өгөх эцсийн огноо', type: 'date' },
+      { key: 'phone', label: 'Холбоо барих утас', type: 'tel' },
+    ]},
+    { title: 'Гарын үсэг', fields: [
+      { key: 'signoff', label: 'Төгсгөлийн үг' },
+      { key: 'senderName', label: 'Илгээгчийн нэр' },
+      { key: 'senderDetails', label: 'Илгээгчийн мэдээлэл', rows: 2 },
+    ]},
+    { title: 'Баннер', banner: true, open: true, fields: [] },
+    { title: 'Имэйлийн текст', tokens: true, fields: [
+      { key: 'heading', label: 'Гарчиг (баннергүй үед харагдана)' },
+      { key: 'greeting', label: 'Мэндчилгээ' },
+      { key: 'intro', label: 'Эхний өгүүлбэр', rows: 3 },
+      { key: 'appointmentLabel', label: 'Томилгооны гарчиг' },
+      { key: 'appointment', label: 'Томилгооны текст', rows: 4 },
+      { key: 'deadlineLabel', label: 'Хугацааны гарчиг' },
+      { key: 'deadlineText', label: 'Хугацааны текст', rows: 3 },
+      { key: 'contact', label: 'Холбоо барих мөр' },
+      { key: 'replyNote', label: 'Нэмэлт тайлбар', rows: 2 },
+      { key: 'footer', label: 'Хөл хэсэг' },
+    ]},
+  ];
+
+  /* ---------- Saved settings: only what differs from DEFAULTS, on this device ---------- */
+  const STORE_KEY = 'jci-email-settings-v1';
+  function loadSaved() {
+    try { return JSON.parse(localStorage.getItem(STORE_KEY)) || {}; } catch { return {}; }
+  }
+  function save() {
+    const changed = {};
+    for (const key in DEFAULTS) if (state[key] !== DEFAULTS[key]) changed[key] = state[key];
+    try { localStorage.setItem(STORE_KEY, JSON.stringify(changed)); } catch {}
+  }
+
+  const state = { ...DEFAULTS, ...loadSaved(), name: '', region: '' };
+  if (!BANNERS.some(b => b.file === state.bannerFile)) state.bannerFile = DEFAULTS.bannerFile;
+  let template = '';
+
+  const form = document.getElementById('form');
+  const mail = document.getElementById('mail');
+  const msg = document.getElementById('msg');
+  const copyBtn = document.getElementById('copy');
+
+  /* ---------- Text helpers ---------- */
+  const esc = s => String(s)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+
+  // Mongolian grammar depends on the number: "11 дүгээр сарын", "12 дугаар сарын", "14-ний", "06-ны".
+  const MONTH_ENDING = { 1: 'дүгээр', 2: 'дугаар', 3: 'дугаар', 4: 'дүгээр', 5: 'дугаар', 6: 'дугаар',
+                         7: 'дугаар', 8: 'дугаар', 9: 'дүгээр', 10: 'дугаар', 11: 'дүгээр', 12: 'дугаар' };
+  function longDate(iso) {
+    const [y, m, d] = (iso || '').split('-').map(Number);
+    if (!y || !m || !d) return '[Огноо]';
+    const dayEnding = [1, 4, 9].includes(d % 10) ? 'ний' : 'ны';
+    return `${y} оны ${m} ${MONTH_ENDING[m]} сарын ${String(d).padStart(2, '0')}-${dayEnding}`;
+  }
+
+  function tokens() {
+    const region = state.region.trim();
+    const phone = state.phone.trim();
+    return {
+      'нэр': `<strong>${esc(state.name.trim() || '[Нэр]')}</strong>`,
+      'албан тушаал': `<strong>${esc(`${region || '[Бүс]'} ${state.role.trim()}`.trim())}</strong>`,
+      'он': esc(state.year.trim()),
+      'огноо': `<strong>${esc(longDate(state.deadline))}</strong>`,
+      'утас': `<a href="tel:${esc(phone.replace(/[^\d+]/g, ''))}" style="color:#0A7CC2;font-weight:600;text-decoration:none;">${esc(phone)}</a>`,
+    };
+  }
+
+  function fill(text, values) {
+    return esc(text)
+      .replace(/\{([^{}]+)\}/g, (match, key) => key in values ? values[key] : match)
+      .replace(/\n/g, '<br>');
+  }
+
+  /* ---------- Build the email ---------- */
+  function buildEmail() {
+    const values = tokens();
+    const html = template.replace(/<!--[\s\S]*?-->/g, '').replace(/\{\{(\w+)\}\}/g, (match, key) => {
+      if (!(key in state)) return match;
+      return fill(state[key], values);
+    });
+    const holder = document.createElement('template');
+    holder.innerHTML = html.trim();
+    holder.content.querySelectorAll('[data-if]').forEach(row => {
+      if ((row.dataset.if === 'banner') === Boolean(state.bannerFile)) row.removeAttribute('data-if');
+      else row.remove();
+    });
+    const out = document.createElement('div');
+    out.append(holder.content);
+    return out.innerHTML;
+  }
+
+  function render() {
+    const oldHero = mail.querySelector('img');
+    mail.innerHTML = buildEmail();
+    const newHero = mail.querySelector('img');
+    if (oldHero && newHero && oldHero.src === newHero.src) { // keeps the GIF playing while typing
+      oldHero.alt = newHero.alt;
+      newHero.replaceWith(oldHero);
+    }
+  }
+
+  /* ---------- Form ---------- */
+  function fieldHtml(f) {
+    const attrs = `data-key="${f.key}"`;
+    const control = f.rows
+      ? `<textarea rows="${f.rows}" ${attrs}></textarea>`
+      : `<input type="${f.type || 'text'}" ${f.inputmode ? `inputmode="${f.inputmode}"` : ''} ${attrs}>`;
+    return `<label class="field">${esc(f.label)}${control}</label>`;
+  }
+
+  function buildForm() {
+    let html = `
+      <section class="card"><div class="card-body">
+        <h2>Хүлээн авагч</h2>
+        <label class="field">Нэр<input data-key="name" placeholder="ж: Болд" autocapitalize="words"></label>
+        <label class="field">Бүс<input data-key="region" placeholder="ж: Зүүн" autocapitalize="words"></label>
+      </div></section>`;
+    for (const group of GROUPS) {
+      let body = group.fields.map(fieldHtml).join('');
+      if (group.tokens) {
+        body = `<p class="hint">Эдгээр үгс автоматаар бөглөгдөнө: <code>{нэр}</code> <code>{албан тушаал}</code> <code>{он}</code> <code>{огноо}</code> <code>{утас}</code></p>` + body;
+      }
+      if (group.banner) {
+        const options = BANNERS.map(b => `
+          <label class="banner-option">
+            <input type="radio" name="banner" data-key="bannerFile" value="${esc(b.file)}">
+            ${b.file ? `<img class="banner-thumb" src="${esc(b.file)}" alt="">` : `<span class="banner-thumb">Аа</span>`}
+            <span>${esc(b.label)}</span>
+          </label>`).join('');
+        body = `
+          <div class="banner-grid" role="radiogroup" aria-label="Баннер сонгох">${options}</div>
+          <p class="hint">Шинэ баннеруудад он бичээгүй тул жил бүр ашиглаж болно. “Анхны” баннер дээр 2027 он бичигдсэн. <a id="banner-download" download>GIF татах</a></p>`;
+      }
+      html += `<details class="card"${group.open ? ' open' : ''}><summary>${esc(group.title)}</summary><div class="card-body">${body}</div></details>`;
+    }
+    html += `<button type="button" class="link" id="reset">Анхны утгаар сэргээх</button>`;
+    form.innerHTML = html;
+  }
+
+  function syncForm() {
+    form.querySelectorAll('[data-key]').forEach(el => {
+      if (el.type === 'radio') el.checked = el.value === state[el.dataset.key];
+      else el.value = state[el.dataset.key];
+    });
+    bannerChanged();
+  }
+
+  // Online, emails link the GIF by its public URL. Without HTTPS (this computer) nobody else
+  // can reach that URL, so the GIF is embedded in the email instead.
+  const online = location.protocol === 'https:';
+  const embedded = {};
+  function bannerSrc() {
+    const file = state.bannerFile;
+    return online ? new URL(file, location.href).href : embedded[file] || file;
+  }
+
+  function bannerChanged() {
+    const file = state.bannerFile;
+    const link = document.getElementById('banner-download');
+    link.hidden = !file;
+    if (file) link.href = file;
+    if (online || !file || embedded[file]) return;
+    fetch(file).then(r => r.blob()).then(blob => {
+      const reader = new FileReader();
+      reader.onload = () => { embedded[file] = reader.result; };
+      reader.readAsDataURL(blob);
+    }).catch(() => {});
+  }
+
+  function setMsg(text, kind) { msg.textContent = text; msg.dataset.kind = kind || ''; }
+
+  form.addEventListener('input', e => {
+    const key = e.target.dataset.key;
+    if (!key) return;
+    state[key] = e.target.value;
+    if (key === 'bannerFile') bannerChanged();
+    e.target.classList.remove('missing');
+    setMsg('Мэдээллээ бөглөөд имэйлээ хуулна уу.');
+    save();
+    render();
+  });
+  form.addEventListener('submit', e => e.preventDefault());
+  form.addEventListener('click', e => {
+    if (e.target.id !== 'reset') return;
+    if (!confirm('Бүх тохиргоог анхны утгаар сэргээх үү?')) return;
+    Object.assign(state, DEFAULTS);
+    try { localStorage.removeItem(STORE_KEY); } catch {}
+    syncForm();
+    render();
+    setMsg('Анхны утгаар сэргээгдлээ.');
+  });
+
+  /* ---------- Preview light / dark ---------- */
+  const modeButtons = document.querySelectorAll('.segment button');
+  function setMode(mode) {
+    mail.dataset.mode = mode;
+    modeButtons.forEach(b => b.setAttribute('aria-pressed', String(b.dataset.mode === mode)));
+  }
+  modeButtons.forEach(b => b.addEventListener('click', () => setMode(b.dataset.mode)));
+  const systemDark = matchMedia('(prefers-color-scheme: dark)');
+  systemDark.addEventListener('change', e => setMode(e.matches ? 'dark' : 'light'));
+  setMode(systemDark.matches ? 'dark' : 'light');
+
+  /* ---------- Copy ----------
+     The "copy" event hands over the exact HTML. Copying rendered text would bake this page's
+     colors into the email, and the email would stop adapting to light and dark mode. */
+  function copyExact(html, text) {
+    let copied = false;
+    const onCopy = e => {
+      e.clipboardData.setData('text/html', html);
+      e.clipboardData.setData('text/plain', text);
+      e.preventDefault();
+      copied = true;
+    };
+    document.addEventListener('copy', onCopy);
+    const selection = getSelection();
+    selection.selectAllChildren(mail); // Safari only fires "copy" when something is selected
+    try { document.execCommand('copy'); } catch {}
+    selection.removeAllRanges();
+    document.removeEventListener('copy', onCopy);
+    return copied;
+  }
+
+  async function copyWithClipboardApi(html, text) {
+    await navigator.clipboard.write([new ClipboardItem({
+      'text/html': new Blob([html], { type: 'text/html' }),
+      'text/plain': new Blob([text], { type: 'text/plain' }),
+    })]);
+  }
+
+  let copiedTimer;
+  copyBtn.addEventListener('click', async () => {
+    const missing = ['name', 'region'].filter(key => !state[key].trim());
+    if (missing.length) {
+      missing.forEach(key => form.querySelector(`[data-key="${key}"]`).classList.add('missing'));
+      form.querySelector(`[data-key="${missing[0]}"]`).focus();
+      setMsg('Эхлээд нэр, бүсээ бичнэ үү.', 'error');
+      return;
+    }
+    const html = buildEmail().split(`src="${state.bannerFile}"`).join(`src="${bannerSrc()}"`);
+    const text = mail.innerText.replace(/\n{3,}/g, '\n\n').trim();
+    try {
+      if (!copyExact(html, text)) await copyWithClipboardApi(html, text);
+      setMsg('Хуулагдлаа. Gmail-ийн шинэ имэйлийн үндсэн хэсэгт буулгана уу (Paste).', 'ok');
+      copyBtn.textContent = 'Хуулагдлаа';
+      clearTimeout(copiedTimer);
+      copiedTimer = setTimeout(() => { copyBtn.textContent = 'Имэйл хуулах'; }, 2000);
+    } catch {
+      setMsg('Хуулж чадсангүй. Дахин оролдоно уу.', 'error');
+    }
+  });
+
+  /* ---------- Start ---------- */
+  buildForm();
+  syncForm();
+
+  fetch('jci-appointment-email.html')
+    .then(r => { if (!r.ok) throw new Error(r.status); return r.text(); })
+    .then(t => { template = t; render(); })
+    .catch(() => setMsg('Имэйлийн загвар ачаалж чадсангүй. Хуудсаа дахин ачаална уу.', 'error'));
+</script>
+</body>
+</html>

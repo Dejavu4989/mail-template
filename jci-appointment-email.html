@@ -1,0 +1,75 @@
+<!--
+  Email template. index.html fills every {{token}} from the form.
+
+  Rules that keep it working in iPhone / Gmail light and dark mode:
+  - Styles must stay inline. Gmail removes <style> blocks when pasting.
+  - No background colors, and no color on normal text. The text then inherits
+    the mail app's own color, so it adapts to light and dark mode by itself.
+  - The only two colors allowed are mid-tones readable on white and on black:
+    #0A7CC2 (accent) and #7C7C80 (secondary text).
+  - Rows with data-if="banner" / data-if="no-banner" are shown or removed by
+    the banner choice in the maker.
+-->
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="width:100%;max-width:560px;margin:0 auto;border-collapse:collapse;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:16px;line-height:1.55;">
+
+  <tr data-if="banner">
+    <td style="padding:0 0 28px;">
+      <img src="{{bannerFile}}" width="560" alt="{{heading}}" style="display:block;width:100%;max-width:560px;height:auto;border:0;border-radius:12px;">
+    </td>
+  </tr>
+
+  <tr data-if="no-banner">
+    <td style="padding:0 0 20px;">
+      <p style="margin:0;font-size:28px;line-height:1.25;font-weight:700;">{{heading}}</p>
+    </td>
+  </tr>
+
+  <tr>
+    <td style="padding:0 0 24px;">
+      <p style="margin:0 0 12px;">{{greeting}}</p>
+      <p style="margin:0;">{{intro}}</p>
+    </td>
+  </tr>
+
+  <tr>
+    <td style="padding:2px 0 2px 16px;border-left:3px solid #0A7CC2;">
+      <p style="margin:0 0 4px;font-size:12px;line-height:1.4;font-weight:600;letter-spacing:.6px;text-transform:uppercase;color:#0A7CC2;">{{appointmentLabel}}</p>
+      <p style="margin:0;">{{appointment}}</p>
+    </td>
+  </tr>
+
+  <tr>
+    <td style="padding:24px 0 0;">
+      <p style="margin:0 0 4px;font-size:12px;line-height:1.4;font-weight:600;letter-spacing:.6px;text-transform:uppercase;color:#7C7C80;">{{deadlineLabel}}</p>
+      <p style="margin:0;">{{deadlineText}}</p>
+    </td>
+  </tr>
+
+  <tr>
+    <td style="padding:24px 0 0;">
+      <p style="margin:0 0 4px;">{{contact}}</p>
+      <p style="margin:0;font-size:14px;color:#7C7C80;">{{replyNote}}</p>
+    </td>
+  </tr>
+
+  <tr>
+    <td style="padding:28px 0 0;">
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;">
+        <tr>
+          <td style="padding:20px 0 0;border-top:1px solid rgba(142,142,147,.4);">
+            <p style="margin:0 0 8px;font-size:14px;color:#7C7C80;">{{signoff}}</p>
+            <p style="margin:0;font-weight:600;">{{senderName}}</p>
+            <p style="margin:0;font-size:14px;line-height:1.45;">{{senderDetails}}</p>
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+
+  <tr>
+    <td style="padding:20px 0 0;">
+      <p style="margin:0;font-size:12px;line-height:1.4;color:#7C7C80;">{{footer}}</p>
+    </td>
+  </tr>
+
+</table>
