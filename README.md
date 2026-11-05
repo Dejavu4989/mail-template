@@ -9,8 +9,8 @@ and paste the finished email into Gmail.
 |---|---|
 | `index.html` | The maker page: form, live preview, copy button. Default content is in `DEFAULTS` at the top of the script |
 | `jci-appointment-email.html` | The email layout, filled in through `{{tokens}}` |
-| `banners/` | Animated banners to choose from (1120x448, about 200 KB each, no year in the image) |
-| `hero.gif` | Original banner with 2027 in the image. Keep it: emails already sent load it |
+| `banners/` | Animated banners to choose from: `ocean`, `night`, `berry`, `sky` (1080x486, about 400 KB each, no year in the image). `blue`, `dark`, `light` and `gold` are the older set, no longer offered |
+| `hero.gif` | Original banner and the default choice, with 2027 in the image. Keep it: emails already sent load it |
 | `tools/make-banners.py` | Creates the GIFs in `banners/` |
 | `vercel.json` | Caching and CORS headers for the banners |
 | `.vercelignore` | Keeps `.claude/`, `tools/` and this README off the public site |
@@ -74,6 +74,8 @@ npx vercel --prod
 Keep these rules in `jci-appointment-email.html`, or iPhone dark mode will break again:
 
 - All styles stay **inline**. Gmail removes `<style>` blocks when pasting.
-- **No background colors, and no color on normal text.** Text then inherits the mail app color and adapts
-  to light and dark mode by itself.
-- Use only `#0A7CC2` (accent) and `#7C7C80` (secondary text). Both are readable on white and on black.
+- Large colored areas use **see-through tints** (`rgba(...)` at 15% or less). They look right on a white and on a
+  black page, and if a mail app drops them the text is still readable. Never use solid dark or solid light backgrounds.
+- **No color on normal text.** It then inherits the mail app color and adapts to light and dark mode by itself.
+- Solid color only on small badges and the button, with white text on a mid-tone.
+- Colored text uses only `#0A7CC2` (blue), `#D6335A` (red) and `#7C7C80` (gray), which read on white and on black.

@@ -4,13 +4,13 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="color-scheme" content="light dark">
-<meta name="theme-color" media="(prefers-color-scheme: light)" content="#f2f2f7">
-<meta name="theme-color" media="(prefers-color-scheme: dark)" content="#000000">
+<meta name="theme-color" media="(prefers-color-scheme: light)" content="#002f6c">
+<meta name="theme-color" media="(prefers-color-scheme: dark)" content="#002f6c">
 <title>Email Maker</title>
 <style>
   :root {
     color-scheme: light dark;
-    --bg: #f2f2f7;
+    --bg: #eef3f8;
     --card: #ffffff;
     --segment-on: #ffffff;
     --field: #f2f2f7;
@@ -19,7 +19,6 @@
     --line: rgba(60, 60, 67, .16);
     --bar: rgba(242, 242, 247, .86);
     --accent: #0a7cc2;
-    --on-accent: #ffffff;
     --danger: #c5281c;
     --success: #1f7a3d;
   }
@@ -34,7 +33,6 @@
       --line: rgba(235, 235, 245, .16);
       --bar: rgba(0, 0, 0, .8);
       --accent: #4aa8ea;
-      --on-accent: #00233a;
       --danger: #ff6961;
       --success: #5dd27f;
     }
@@ -56,9 +54,10 @@
     padding-left: max(16px, env(safe-area-inset-left));
     padding-right: max(16px, env(safe-area-inset-right));
   }
-  .top { padding-top: max(24px, env(safe-area-inset-top)); padding-bottom: 16px; }
+  .brand { margin-bottom: 18px; background: #002f6c; background-image: linear-gradient(135deg, #002f6c, #0a5fa8); color: #ffffff; }
+  .top { padding-top: max(22px, env(safe-area-inset-top)); padding-bottom: 20px; }
   .top h1 { margin: 0; font-size: 26px; line-height: 1.2; font-weight: 700; letter-spacing: -.2px; }
-  .top p { margin: 2px 0 0; font-size: 14px; color: var(--muted); }
+  .top p { margin: 2px 0 0; font-size: 14px; color: #bfe6f7; }
 
   .layout { display: grid; gap: 20px; padding-bottom: 28px; }
   .layout > * { min-width: 0; }
@@ -128,10 +127,10 @@
   .segment button[aria-pressed=true] { background: var(--segment-on); box-shadow: 0 1px 3px rgba(0, 0, 0, .18); }
 
   /* The preview imitates a mail app: only background and text color change, like on a real phone. */
-  .mail { padding: 24px 16px; border-radius: 14px; border: 1px solid var(--line); overflow: hidden; overflow-wrap: anywhere; }
+  .mail { padding: 16px 12px; border-radius: 14px; border: 1px solid var(--line); overflow: hidden; overflow-wrap: anywhere; }
   .mail[data-mode=light] { background: #ffffff; color: #1c1c1e; }
   .mail[data-mode=dark] { background: #1c1c1e; color: #f5f5f7; }
-  @media (min-width: 900px) { .mail { padding: 32px; } }
+  @media (min-width: 900px) { .mail { padding: 24px; } }
 
   .bar {
     position: sticky; bottom: 0; z-index: 5;
@@ -146,19 +145,22 @@
   #msg[data-kind=error] { color: var(--danger); }
   #msg[data-kind=ok] { color: var(--success); }
   #copy {
-    flex: none; min-height: 46px; padding: 0 22px; border: 0; border-radius: 12px;
-    background: var(--accent); color: var(--on-accent);
+    flex: none; min-height: 46px; padding: 0 24px; border: 0; border-radius: 999px;
+    background: #ffd166; color: #002f6c;
     font: inherit; font-size: 16px; font-weight: 600; cursor: pointer;
   }
+  #copy:hover { background: #ffe08f; }
   #copy:active { opacity: .8; }
 
   @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
 </style>
 </head>
 <body>
-  <header class="top">
-    <h1>Имэйл үүсгэгч</h1>
-    <p>JCI Монгол · томилгооны имэйл</p>
+  <header class="brand">
+    <div class="top">
+      <h1>Имэйл үүсгэгч</h1>
+      <p>JCI Монгол · томилгооны имэйл</p>
+    </div>
   </header>
 
   <main class="layout">
@@ -190,7 +192,7 @@
     role: 'бүс хариуцсан ажилтан',
     deadline: '2026-11-06',
     phone: '8888 2971',
-    bannerFile: 'banners/blue.gif',
+    bannerFile: 'hero.gif',
     signoff: 'Хүндэтгэсэн,',
     senderName: 'А. Эрдэнэгарьд /SG/',
     senderDetails: '{он} оны Хөгжлийн зөвлөл\n“Жэй Си Ай Монгол” ТББ',
@@ -208,11 +210,11 @@
 
   /* ---------- Banner choices. An empty file means no banner, only the text heading. ---------- */
   const BANNERS = [
-    { file: 'banners/blue.gif', label: 'Цэнхэр' },
-    { file: 'banners/dark.gif', label: 'Бараан' },
-    { file: 'banners/light.gif', label: 'Цайвар' },
-    { file: 'banners/gold.gif', label: 'Алтлаг' },
     { file: 'hero.gif', label: 'Анхны (2027)' },
+    { file: 'banners/ocean.gif', label: 'Цэнхэр' },
+    { file: 'banners/night.gif', label: 'Бараан' },
+    { file: 'banners/berry.gif', label: 'Улаан' },
+    { file: 'banners/sky.gif', label: 'Цайвар' },
     { file: '', label: 'Баннергүй' },
   ];
 
@@ -282,8 +284,8 @@
     const region = state.region.trim();
     const phone = state.phone.trim();
     return {
-      'нэр': `<strong>${esc(state.name.trim() || '[Нэр]')}</strong>`,
-      'албан тушаал': `<strong>${esc(`${region || '[Бүс]'} ${state.role.trim()}`.trim())}</strong>`,
+      'нэр': `<strong style="color:#0A7CC2;">${esc(state.name.trim() || '[Нэр]')}</strong>`,
+      'албан тушаал': `<strong style="color:#0A7CC2;font-size:17px;">${esc(`${region || '[Бүс]'} ${state.role.trim()}`.trim())}</strong>`,
       'он': esc(state.year.trim()),
       'огноо': `<strong>${esc(longDate(state.deadline))}</strong>`,
       'утас': `<a href="tel:${esc(phone.replace(/[^\d+]/g, ''))}" style="color:#0A7CC2;font-weight:600;text-decoration:none;">${esc(phone)}</a>`,
@@ -296,10 +298,31 @@
       .replace(/\n/g, '<br>');
   }
 
+  // First letters of the first two words, skipping things like /SG/: "А. Эрдэнэгарьд /SG/" gives "АЭ".
+  function initials(name) {
+    const words = name.split(/\s+/).filter(word => /^\p{L}/u.test(word));
+    return words.slice(0, 2).map(word => word[0].toUpperCase()).join('');
+  }
+
+  // Pieces of the email worked out from the form, rather than typed in directly.
+  function computedParts(values) {
+    const [, month, day] = (state.deadline || '').split('-').map(Number);
+    const phone = state.phone.trim();
+    return {
+      deadlineMonth: month ? `${month}-Р САР` : '',
+      deadlineDay: day ? String(day).padStart(2, '0') : '—',
+      phoneHref: `tel:${esc(phone.replace(/[^\d+]/g, ''))}`,
+      contactButton: fill(state.contact, { ...values, 'утас': esc(phone).replace(/ /g, '&nbsp;') }), // the whole button is the link
+      initials: esc(initials(state.senderName)),
+    };
+  }
+
   /* ---------- Build the email ---------- */
   function buildEmail() {
     const values = tokens();
+    const computed = computedParts(values);
     const html = template.replace(/<!--[\s\S]*?-->/g, '').replace(/\{\{(\w+)\}\}/g, (match, key) => {
+      if (key in computed) return computed[key];
       if (!(key in state)) return match;
       return fill(state[key], values);
     });
@@ -479,7 +502,7 @@
   buildForm();
   syncForm();
 
-  fetch('jci-appointment-email.html')
+  fetch('jci-appointment-email.html', { cache: 'no-cache' })
     .then(r => { if (!r.ok) throw new Error(r.status); return r.text(); })
     .then(t => { template = t; render(); })
     .catch(() => setMsg('Имэйлийн загвар ачаалж чадсангүй. Хуудсаа дахин ачаална уу.', 'error'));
