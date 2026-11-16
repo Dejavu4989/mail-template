@@ -192,20 +192,20 @@
   const DEFAULTS = {
     year: '2027',
     role: 'бүс хариуцсан ажилтан',
-    deadline: '2026-11-06',
+    deadline: '2026-11-18',
     showDeadline: true,
-    phone: '8888 2971',
+    phone: '88006470',
     bannerFile: 'banners/ocean-confirmed-v2.gif',
     signoff: 'Хүндэтгэсэн,',
     senderName: 'А. Эрдэнэгарьд /SG/',
     senderDetails: '{он} оны Хөгжлийн зөвлөл\n“Жэй Си Ай Монгол” ТББ',
     heading: 'БҮРТГЭЛ БАТАЛГААЖСАН',
     greeting: 'Сайн байна уу, {нэр},',
-    intro: 'Таныг JCI Монгол байгууллагын {он} оны Хөгжлийн зөвлөлийн сонгон шалгаруулалтад оролцсонд баярлалаа.',
-    appointmentLabel: 'Албан ёсны томилгоо',
-    appointment: 'Сонгон шалгаруулалтын үр дүнд таныг {он} оны Хөгжлийн зөвлөлийн {албан тушаал} албан тушаалд томилогдсоныг албан ёсоор мэдэгдэж байна.',
-    deadlineLabel: 'Хариу өгөх хугацаа',
-    deadlineText: 'Томилгоо, саналыг хүлээн авч буй эсэхээ {огноо} өдрийн дотор хариу мэдэгдэж, баталгаажуулна уу.',
+    intro: 'JCI Ikh Huree I Networking Event EP2-д бүртгүүлсэн танд баярлалаа. Таны бүртгэл баталгаажлаа.\n\nХамтдаа нөхөрлөе, хөгжье, суралцъя!',
+    appointmentLabel: '',
+    appointment: 'ХААНА: Циркийн зүүн хойд талд KAWAI center 3 давхарт',
+    deadlineLabel: 'Хэзээ: 2026/11/18 Лхагва гараг 19 цагт',
+    deadlineText: '',
     contact: 'Асуух зүйл байвал: {утас}',
     replyNote: 'Энэ имэйлд хариу бичиж баталгаажуулах боломжтой.',
     footer: 'JCI Mongolia · {он} Development Council',
@@ -262,7 +262,7 @@
     try { localStorage.setItem(STORE_KEY, JSON.stringify(changed)); } catch {}
   }
 
-  const state = { ...DEFAULTS, ...loadSaved(), name: '', region: '' };
+  const state = { ...DEFAULTS, ...loadSaved(), name: 'Гэрэл', region: '' };
   if (!BANNERS.some(b => b.file === state.bannerFile)) state.bannerFile = DEFAULTS.bannerFile;
   let template = '';
 
