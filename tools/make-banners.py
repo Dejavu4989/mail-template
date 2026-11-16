@@ -7,7 +7,7 @@ Run from the project folder (needs Windows fonts and Pillow: pip install pillow)
 To change the wording or add a style, edit TITLE, EYEBROW or THEMES below.
 
 Banners are cached for a year and already-sent emails keep loading them, so never
-overwrite a banner that has been used. Give the new version a new theme name and
+overwrite a banner that has been used. Change VERSION (or the theme name) for a new design, and
 add it to BANNERS in index.html.
 """
 import math
@@ -16,8 +16,9 @@ from pathlib import Path
 
 from PIL import Image, ImageChops, ImageDraw, ImageFilter, ImageFont
 
-TITLE = 'Танд баяр хүргэе!'
+TITLE = 'БҮРТГЭЛ БАТАЛГААЖСАН'
 EYEBROW = 'JCI MONGOLIA  ·  ХӨГЖЛИЙН ЗӨВЛӨЛ'
+VERSION = 'confirmed'       # part of every file name; change it whenever the design changes
 
 WIDTH, HEIGHT = 1080, 486   # same shape as hero.gif, so banners swap without moving the email
 SCALE = 2                   # drawn larger, then shrunk, for smooth edges
@@ -36,7 +37,7 @@ STRIP = ['#FFD166', '#06D6A0', '#2EB6F0', '#D6335A']   # thin band along the bot
 KEEP_CLEAR = [
     (0.17, 0.05, 0.83, 0.23),   # label
     (0.38, 0.20, 0.62, 0.62),   # party popper
-    (0.07, 0.58, 0.93, 0.92),   # title
+    (0.05, 0.60, 0.95, 0.92),   # title
     (0.00, 0.94, 1.00, 1.00),   # bottom strip
 ]
 
@@ -115,10 +116,10 @@ def title_layer(theme):
     size = 92 * s
     probe = ImageDraw.Draw(Image.new('L', (1, 1)))
     font = ImageFont.truetype(str(TITLE_FONT), size)
-    while probe.textlength(TITLE, font=font) > WIDTH * s * 0.8:
+    while probe.textlength(TITLE, font=font) > WIDTH * s * 0.86:
         size -= 2
         font = ImageFont.truetype(str(TITLE_FONT), size)
-    position = (WIDTH * s / 2, HEIGHT * s * 0.745)
+    position = (WIDTH * s / 2, HEIGHT * s * 0.75)
 
     text = Image.new('RGBA', (WIDTH * s, HEIGHT * s), (0, 0, 0, 0))
     ImageDraw.Draw(text).text(position, TITLE, font=font, fill=theme['title'], anchor='mm')
@@ -158,16 +159,17 @@ def popper_layer():
     draw.arc((290, 362, 610, 438), 0, 360, fill='#FFE29A', width=12)
 
     art = art.rotate(-32, Image.BICUBIC)
-    art = art.resize((int(HEIGHT * 0.48), int(HEIGHT * 0.48)), Image.LANCZOS)
+    art = art.resize((int(HEIGHT * 0.46), int(HEIGHT * 0.46)), Image.LANCZOS)
     shadow = Image.new('RGBA', art.size, (0, 0, 0, 0))
     shadow.paste((0, 0, 0, 70), (0, 0), art.getchannel('A'))
     shadow = shadow.filter(ImageFilter.GaussianBlur(5))
 
     layer = Image.new('RGBA', (WIDTH, HEIGHT), (0, 0, 0, 0))
-    place = ((WIDTH - art.width) // 2 - 4, int(HEIGHT * 0.195))
+    place = ((WIDTH - art.width) // 2 - 4, int(HEIGHT * 0.2))
     layer.alpha_composite(shadow, (place[0] + 2, place[1] + 4))
     layer.alpha_composite(art, place)
     return layer
+
 
 
 def bottom_strip():
@@ -279,7 +281,7 @@ def make_banner(name, theme, out_dir):
     frames = [with_confetti(still, pieces, i / FRAMES).quantize(palette=palette, dither=Image.Dither.NONE)
               for i in range(FRAMES)]
 
-    path = out_dir / f'{name}.gif'
+    path = out_dir / f'{name}-{VERSION}.gif'
     frames[0].save(path, save_all=True, append_images=frames[1:], duration=FRAME_MS, loop=0, disposal=1)
     print(f'{path.name}: {path.stat().st_size // 1024} KB')
 

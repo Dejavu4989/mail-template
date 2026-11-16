@@ -9,7 +9,7 @@ and paste the finished email into Gmail.
 |---|---|
 | `index.html` | The maker page: form, live preview, copy button. Default content is in `DEFAULTS` at the top of the script |
 | `jci-appointment-email.html` | The email layout, filled in through `{{tokens}}` |
-| `banners/` | Animated banners to choose from: `ocean`, `night`, `berry`, `sky` (1080x486, about 400 KB each, no year in the image). `blue`, `dark`, `light` and `gold` are the older set, no longer offered |
+| `banners/` | Animated banners to choose from: `ocean-confirmed`, `night-confirmed`, `berry-confirmed`, `sky-confirmed` (1080x486, about 400 KB each, titled "БҮРТГЭЛ БАТАЛГААЖСАН", no year). The other files there are older versions, no longer offered but kept for emails already sent |
 | `hero.gif` | Original banner and the default choice, with 2027 in the image. Keep it: emails already sent load it |
 | `tools/make-banners.py` | Creates the GIFs in `banners/` |
 | `vercel.json` | Caching and CORS headers for the banners |
@@ -18,7 +18,7 @@ and paste the finished email into Gmail.
 ## What can be changed
 
 - **Per email:** recipient name and region.
-- **In the form, saved on that device:** year, role, deadline, phone, signature, banner choice, and every sentence.
+- **In the form, saved on that device:** year, role, deadline (or no deadline section at all), phone, signature, banner choice, and every sentence.
 - **For everyone:** edit `DEFAULTS` in `index.html` and redeploy. Form settings are stored per browser,
   so staff do not see each other's changes. **Анхны утгаар сэргээх** returns to `DEFAULTS`.
 - **Not editable in the form:** the text drawn inside the banner images. To change it, see below.
@@ -35,7 +35,7 @@ pip install pillow
 python tools/make-banners.py
 ```
 
-Edit `TITLE`, `EYEBROW` or `THEMES` at the top of the script first, then add each new file to `BANNERS` in `index.html`.
+Edit `TITLE`, `EYEBROW` or `THEMES` at the top of the script first, and change `VERSION` so the files get new names, then add each new file to `BANNERS` in `index.html`.
 **Use a new theme name for a changed design.** Never overwrite a banner that has been used: sent emails keep
 loading it, and it is cached for a year.
 

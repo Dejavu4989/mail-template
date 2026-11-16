@@ -97,6 +97,9 @@
   :is(input, textarea, button, summary, a):focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
   input.missing { box-shadow: inset 0 0 0 1.5px var(--danger); }
 
+  .switch { display: flex; align-items: center; gap: 10px; min-height: 32px; font-size: 15px; color: var(--text); cursor: pointer; }
+  .switch input { width: 20px; height: 20px; margin: 0; accent-color: var(--accent); }
+  input:disabled, textarea:disabled { opacity: .45; }
   .banner-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
   .banner-option { position: relative; display: grid; gap: 5px; font-size: 13px; color: var(--muted); cursor: pointer; }
   .banner-option input { position: absolute; opacity: 0; width: 1px; height: 1px; margin: 0; }
@@ -191,12 +194,13 @@
     year: '2027',
     role: 'бүс хариуцсан ажилтан',
     deadline: '2026-11-06',
+    showDeadline: true,
     phone: '8888 2971',
-    bannerFile: 'hero.gif',
+    bannerFile: 'banners/ocean-confirmed.gif',
     signoff: 'Хүндэтгэсэн,',
     senderName: 'А. Эрдэнэгарьд /SG/',
     senderDetails: '{он} оны Хөгжлийн зөвлөл\n“Жэй Си Ай Монгол” ТББ',
-    heading: 'Танд баяр хүргэе!',
+    heading: 'БҮРТГЭЛ БАТАЛГААЖСАН',
     greeting: 'Сайн байна уу, {нэр},',
     intro: 'Таныг JCI Монгол байгууллагын {он} оны Хөгжлийн зөвлөлийн сонгон шалгаруулалтад оролцсонд баярлалаа.',
     appointmentLabel: 'Албан ёсны томилгоо',
@@ -209,12 +213,13 @@
   };
 
   /* ---------- Banner choices. An empty file means no banner, only the text heading. ---------- */
+  // caption: the words drawn in the image. Used as alt text for mail apps that block images.
   const BANNERS = [
-    { file: 'hero.gif', label: 'Анхны (2027)' },
-    { file: 'banners/ocean.gif', label: 'Цэнхэр' },
-    { file: 'banners/night.gif', label: 'Бараан' },
-    { file: 'banners/berry.gif', label: 'Улаан' },
-    { file: 'banners/sky.gif', label: 'Цайвар' },
+    { file: 'hero.gif', label: 'Анхны (2027)', caption: 'Танд баяр хүргэе!' },
+    { file: 'banners/ocean-confirmed.gif', label: 'Цэнхэр', caption: 'БҮРТГЭЛ БАТАЛГААЖСАН' },
+    { file: 'banners/night-confirmed.gif', label: 'Бараан', caption: 'БҮРТГЭЛ БАТАЛГААЖСАН' },
+    { file: 'banners/berry-confirmed.gif', label: 'Улаан', caption: 'БҮРТГЭЛ БАТАЛГААЖСАН' },
+    { file: 'banners/sky-confirmed.gif', label: 'Цайвар', caption: 'БҮРТГЭЛ БАТАЛГААЖСАН' },
     { file: '', label: 'Баннергүй' },
   ];
 
@@ -223,6 +228,7 @@
     { title: 'Томилгоо', fields: [
       { key: 'year', label: 'Он', inputmode: 'numeric' },
       { key: 'role', label: 'Албан тушаал (бүсийн нэрийн дараах хэсэг)' },
+      { key: 'showDeadline', label: 'Хариу өгөх хугацааг харуулах', type: 'checkbox' },
       { key: 'deadline', label: 'Хариу өгөх эцсийн огноо', type: 'date' },
       { key: 'phone', label: 'Холбоо барих утас', type: 'tel' },
     ]},
@@ -328,10 +334,14 @@
     });
     const holder = document.createElement('template');
     holder.innerHTML = html.trim();
+    const show = { 'banner': Boolean(state.bannerFile), 'no-banner': !state.bannerFile, 'deadline': state.showDeadline };
     holder.content.querySelectorAll('[data-if]').forEach(row => {
-      if ((row.dataset.if === 'banner') === Boolean(state.bannerFile)) row.removeAttribute('data-if');
+      if (show[row.dataset.if]) row.removeAttribute('data-if');
       else row.remove();
     });
+    const banner = BANNERS.find(b => b.file === state.bannerFile);
+    const img = holder.content.querySelector('img');
+    if (img && banner && banner.caption) img.alt = banner.caption;
     const out = document.createElement('div');
     out.append(holder.content);
     return out.innerHTML;
@@ -350,6 +360,7 @@
   /* ---------- Form ---------- */
   function fieldHtml(f) {
     const attrs = `data-key="${f.key}"`;
+    if (f.type === 'checkbox') return `<label class="switch"><input type="checkbox" ${attrs}>${esc(f.label)}</label>`;
     const control = f.rows
       ? `<textarea rows="${f.rows}" ${attrs}></textarea>`
       : `<input type="${f.type || 'text'}" ${f.inputmode ? `inputmode="${f.inputmode}"` : ''} ${attrs}>`;
@@ -377,7 +388,7 @@
           </label>`).join('');
         body = `
           <div class="banner-grid" role="radiogroup" aria-label="Баннер сонгох">${options}</div>
-          <p class="hint">Шинэ баннеруудад он бичээгүй тул жил бүр ашиглаж болно. “Анхны” баннер дээр 2027 он бичигдсэн. <a id="banner-download" download>GIF татах</a></p>`;
+          <p class="hint">Шинэ баннеруудад он бичээгүй тул жил бүр ашиглаж болно. “Анхны” баннер дээр 2027 он болон “Танд баяр хүргэе!” бичигдсэн. <a id="banner-download" download>GIF татах</a></p>`;
       }
       html += `<details class="card"${group.open ? ' open' : ''}><summary>${esc(group.title)}</summary><div class="card-body">${body}</div></details>`;
     }
@@ -388,9 +399,18 @@
   function syncForm() {
     form.querySelectorAll('[data-key]').forEach(el => {
       if (el.type === 'radio') el.checked = el.value === state[el.dataset.key];
+      else if (el.type === 'checkbox') el.checked = state[el.dataset.key];
       else el.value = state[el.dataset.key];
     });
     bannerChanged();
+    deadlineChanged();
+  }
+
+  // The deadline fields only matter while the deadline section is shown.
+  function deadlineChanged() {
+    for (const key of ['deadline', 'deadlineLabel', 'deadlineText']) {
+      form.querySelector(`[data-key="${key}"]`).disabled = !state.showDeadline;
+    }
   }
 
   // Online, emails link the GIF by its public URL. Without HTTPS (this computer) nobody else
@@ -420,8 +440,9 @@
   form.addEventListener('input', e => {
     const key = e.target.dataset.key;
     if (!key) return;
-    state[key] = e.target.value;
+    state[key] = e.target.type === 'checkbox' ? e.target.checked : e.target.value;
     if (key === 'bannerFile') bannerChanged();
+    if (key === 'showDeadline') deadlineChanged();
     e.target.classList.remove('missing');
     setMsg('Мэдээллээ бөглөөд имэйлээ хуулна уу.');
     save();
