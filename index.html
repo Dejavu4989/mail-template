@@ -95,7 +95,6 @@
   textarea { display: block; resize: vertical; line-height: 1.4; }
   input::placeholder, textarea::placeholder { color: var(--muted); opacity: 1; }
   :is(input, textarea, button, summary, a):focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
-  input.missing { box-shadow: inset 0 0 0 1.5px var(--danger); }
 
   .switch { display: flex; align-items: center; gap: 10px; min-height: 32px; font-size: 15px; color: var(--text); cursor: pointer; }
   .switch input { width: 20px; height: 20px; margin: 0; accent-color: var(--accent); }
@@ -281,19 +280,19 @@
                          7: 'дугаар', 8: 'дугаар', 9: 'дүгээр', 10: 'дугаар', 11: 'дүгээр', 12: 'дугаар' };
   function longDate(iso) {
     const [y, m, d] = (iso || '').split('-').map(Number);
-    if (!y || !m || !d) return '[Огноо]';
+    if (!y || !m || !d) return '';
     const dayEnding = [1, 4, 9].includes(d % 10) ? 'ний' : 'ны';
     return `${y} оны ${m} ${MONTH_ENDING[m]} сарын ${String(d).padStart(2, '0')}-${dayEnding}`;
   }
 
   function tokens() {
-    const region = state.region.trim();
+    const position = `${state.region.trim()} ${state.role.trim()}`.trim(); // both parts are optional
     const phone = state.phone.trim();
     return {
-      'нэр': `<strong style="color:#0A7CC2;">${esc(state.name.trim() || '[Нэр]')}</strong>`,
-      'албан тушаал': `<strong style="color:#0A7CC2;font-size:17px;">${esc(`${region || '[Бүс]'} ${state.role.trim()}`.trim())}</strong>`,
+      'нэр': state.name.trim() ? `<strong style="color:#0A7CC2;">${esc(state.name.trim())}</strong>` : '',
+      'албан тушаал': position ? `<strong style="color:#0A7CC2;font-size:17px;">${esc(position)}</strong>` : '',
       'он': esc(state.year.trim()),
-      'огноо': `<strong>${esc(longDate(state.deadline))}</strong>`,
+      'огноо': state.deadline ? `<strong>${esc(longDate(state.deadline))}</strong>` : '',
       'утас': `<a href="tel:${esc(phone.replace(/[^\d+]/g, ''))}" style="color:#0A7CC2;font-weight:600;text-decoration:none;">${esc(phone)}</a>`,
     };
   }
@@ -316,7 +315,7 @@
     const phone = state.phone.trim();
     return {
       deadlineMonth: month ? `${month}-Р САР` : '',
-      deadlineDay: day ? String(day).padStart(2, '0') : '—',
+      deadlineDay: day ? String(day).padStart(2, '0') : '',
       phoneHref: `tel:${esc(phone.replace(/[^\d+]/g, ''))}`,
       contactButton: fill(state.contact, { ...values, 'утас': esc(phone).replace(/ /g, '&nbsp;') }), // the whole button is the link
       initials: esc(initials(state.senderName)),
@@ -443,7 +442,6 @@
     state[key] = e.target.type === 'checkbox' ? e.target.checked : e.target.value;
     if (key === 'bannerFile') bannerChanged();
     if (key === 'showDeadline') deadlineChanged();
-    e.target.classList.remove('missing');
     setMsg('Мэдээллээ бөглөөд имэйлээ хуулна уу.');
     save();
     render();
@@ -499,13 +497,6 @@
 
   let copiedTimer;
   copyBtn.addEventListener('click', async () => {
-    const missing = ['name', 'region'].filter(key => !state[key].trim());
-    if (missing.length) {
-      missing.forEach(key => form.querySelector(`[data-key="${key}"]`).classList.add('missing'));
-      form.querySelector(`[data-key="${missing[0]}"]`).focus();
-      setMsg('Эхлээд нэр, бүсээ бичнэ үү.', 'error');
-      return;
-    }
     const html = buildEmail().split(`src="${state.bannerFile}"`).join(`src="${bannerSrc()}"`);
     const text = mail.innerText.replace(/\n{3,}/g, '\n\n').trim();
     try {
