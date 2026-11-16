@@ -4,7 +4,7 @@ Run from the project folder (needs Windows fonts and Pillow: pip install pillow)
 
     python tools/make-banners.py
 
-To change the wording or add a style, edit TITLE, EYEBROW or THEMES below.
+To change the wording or add a style, edit TITLE or THEMES below.
 
 Banners are cached for a year and already-sent emails keep loading them, so never
 overwrite a banner that has been used. Change VERSION (or the theme name) for a new design, and
@@ -17,8 +17,7 @@ from pathlib import Path
 from PIL import Image, ImageChops, ImageDraw, ImageFilter, ImageFont
 
 TITLE = 'БҮРТГЭЛ БАТАЛГААЖСАН'
-EYEBROW = 'JCI MONGOLIA  ·  ХӨГЖЛИЙН ЗӨВЛӨЛ'
-VERSION = 'confirmed'       # part of every file name; change it whenever the design changes
+VERSION = 'confirmed-v2'       # part of every file name; change it whenever the design changes
 
 WIDTH, HEIGHT = 1080, 486   # same shape as hero.gif, so banners swap without moving the email
 SCALE = 2                   # drawn larger, then shrunk, for smooth edges
@@ -29,36 +28,34 @@ COLORS = 192
 
 FONT_DIR = Path('C:/Windows/Fonts')
 TITLE_FONT = FONT_DIR / 'palab.ttf'       # has the Mongolian letters; Georgia does not
-EYEBROW_FONT = FONT_DIR / 'seguisb.ttf'
 
 STRIP = ['#FFD166', '#06D6A0', '#2EB6F0', '#D6335A']   # thin band along the bottom, like hero.gif
 
 # Where confetti may not go, as (left, top, right, bottom) in parts of the banner.
 KEEP_CLEAR = [
-    (0.17, 0.05, 0.83, 0.23),   # label
-    (0.38, 0.20, 0.62, 0.62),   # party popper
-    (0.05, 0.60, 0.95, 0.92),   # title
+    (0.38, 0.12, 0.62, 0.56),   # party popper
+    (0.05, 0.54, 0.95, 0.86),   # title
     (0.00, 0.94, 1.00, 1.00),   # bottom strip
 ]
 
 THEMES = {
     'ocean': {
-        'from': '#0B4FA8', 'to': '#17A3E3', 'title': '#FFD166', 'label': '#FFFFFF',
+        'from': '#0B4FA8', 'to': '#17A3E3', 'title': '#FFD166',
         'shadow': '#062A63', 'stripes': (255, 255, 255, 12), 'glow': (255, 255, 255, 46),
         'confetti': ['#FFD166', '#FFFFFF', '#06D6A0', '#FF6B8B', '#8FE3FF'],
     },
     'night': {
-        'from': '#07142E', 'to': '#163B7A', 'title': '#FFD166', 'label': '#DCE8F7',
+        'from': '#07142E', 'to': '#163B7A', 'title': '#FFD166',
         'shadow': '#02060F', 'stripes': (255, 255, 255, 8), 'glow': (90, 170, 255, 46),
         'confetti': ['#FFD166', '#FFFFFF', '#2EB6F0', '#FF6B8B', '#06D6A0'],
     },
     'berry': {
-        'from': '#6E1240', 'to': '#D6335A', 'title': '#FFFFFF', 'label': '#FFE3EA',
+        'from': '#6E1240', 'to': '#D6335A', 'title': '#FFFFFF',
         'shadow': '#3F0824', 'stripes': (255, 255, 255, 12), 'glow': (255, 214, 170, 50),
         'confetti': ['#FFD166', '#FFFFFF', '#FFB3C4', '#8FE3FF', '#06D6A0'],
     },
     'sky': {
-        'from': '#E4F3FC', 'to': '#B5E0F7', 'title': '#0B4FA8', 'label': '#0B4FA8',
+        'from': '#E4F3FC', 'to': '#B5E0F7', 'title': '#0B4FA8',
         'shadow': None, 'stripes': (255, 255, 255, 26), 'glow': (255, 255, 255, 0),
         'confetti': ['#0A7CC2', '#D6335A', '#E0A100', '#06B58A', '#FFFFFF'],
     },
@@ -87,29 +84,6 @@ def glow_layer(color):
     return layer.filter(ImageFilter.GaussianBlur(70))
 
 
-def spaced_text(draw, center, y, text, font, fill, spacing):
-    widths = [draw.textlength(ch, font=font) for ch in text]
-    x = center - (sum(widths) + spacing * (len(text) - 1)) / 2
-    for ch, width in zip(text, widths):
-        draw.text((x, y), ch, font=font, fill=fill, anchor='lm')
-        x += width + spacing
-
-
-def label_layer(theme):
-    s = SCALE
-    layer = Image.new('RGBA', (WIDTH * s, HEIGHT * s), (0, 0, 0, 0))
-    draw = ImageDraw.Draw(layer)
-    font = ImageFont.truetype(str(EYEBROW_FONT), 19 * s)
-    spacing = 2.4 * s
-    text_width = sum(draw.textlength(ch, font=font) for ch in EYEBROW) + spacing * (len(EYEBROW) - 1)
-    center, y = WIDTH * s / 2, HEIGHT * s * 0.135
-    half_w, half_h = text_width / 2 + 26 * s, 22 * s
-    r, g, b = Image.new('RGB', (1, 1), theme['label']).getpixel((0, 0))
-    draw.rounded_rectangle((center - half_w, y - half_h, center + half_w, y + half_h), radius=half_h,
-                           fill=(r, g, b, 28), outline=(r, g, b, 150), width=2 * s)
-    spaced_text(draw, center, y, EYEBROW, font, theme['label'], spacing)
-    return layer.resize((WIDTH, HEIGHT), Image.LANCZOS)
-
 
 def title_layer(theme):
     s = SCALE
@@ -119,7 +93,7 @@ def title_layer(theme):
     while probe.textlength(TITLE, font=font) > WIDTH * s * 0.86:
         size -= 2
         font = ImageFont.truetype(str(TITLE_FONT), size)
-    position = (WIDTH * s / 2, HEIGHT * s * 0.75)
+    position = (WIDTH * s / 2, HEIGHT * s * 0.70)
 
     text = Image.new('RGBA', (WIDTH * s, HEIGHT * s), (0, 0, 0, 0))
     ImageDraw.Draw(text).text(position, TITLE, font=font, fill=theme['title'], anchor='mm')
@@ -165,7 +139,7 @@ def popper_layer():
     shadow = shadow.filter(ImageFilter.GaussianBlur(5))
 
     layer = Image.new('RGBA', (WIDTH, HEIGHT), (0, 0, 0, 0))
-    place = ((WIDTH - art.width) // 2 - 4, int(HEIGHT * 0.2))
+    place = ((WIDTH - art.width) // 2 - 4, int(HEIGHT * 0.13))
     layer.alpha_composite(shadow, (place[0] + 2, place[1] + 4))
     layer.alpha_composite(art, place)
     return layer
@@ -184,7 +158,7 @@ def bottom_strip():
 def static_art(theme):
     """Everything that does not move."""
     art = diagonal_gradient(theme['from'], theme['to']).convert('RGBA')
-    for layer in (stripes_layer(theme['stripes']), glow_layer(theme['glow']), label_layer(theme),
+    for layer in (stripes_layer(theme['stripes']), glow_layer(theme['glow']),
                   popper_layer(), title_layer(theme), bottom_strip()):
         art.alpha_composite(layer)
     return art.convert('RGB')
